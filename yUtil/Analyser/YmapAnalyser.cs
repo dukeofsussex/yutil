@@ -66,17 +66,17 @@
                 {
                     if (ogDef.Position.Z > def.Position.Z && def.CEntityDef.lodLevel == rage__eLodType.LODTYPES_DEPTH_ORPHANHD)
                     {
-                        this.AddIssue(IssueSeverity.Info, file, $"Unnecessary Reposition: \"{def.Name}\" ({def.Position}) can be deleted.");
+                        this.AddIssue(IssueSeverity.Info, file, $"Unnecessary Reposition: [{def.Index}] \"{def.Name}\" ({def.Position}) can be deleted.");
                     }
 
                     if (def.LodDist > 1000)
                     {
-                        this.AddIssue(IssueSeverity.Info, file, $"Large LOD Distance: \"{def.Name}\" ({def.LodDist})");
+                        this.AddIssue(IssueSeverity.Info, file, $"Large LOD Distance: [{def.Index}] \"{def.Name}\" ({def.LodDist})");
                     }
                 }
                 else if (def == null && ogDef.CEntityDef.lodLevel != rage__eLodType.LODTYPES_DEPTH_ORPHANHD)
                 {
-                    this.AddIssue(IssueSeverity.Error, file, $"LOD Disconnect: Deleted linked entity \"{ogDef.Name}\" ({ogDef.Position}) ({ogDef.CEntityDef.lodLevel})");
+                    this.AddIssue(IssueSeverity.Error, file, $"LOD Disconnect: Deleted linked entity [{ogDef.Index}] \"{ogDef.Name}\" ({ogDef.Position}) ({ogDef.CEntityDef.lodLevel})");
                 }
             }
         }
