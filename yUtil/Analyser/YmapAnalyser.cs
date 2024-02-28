@@ -69,7 +69,7 @@
                         this.AddIssue(IssueSeverity.Info, file, $"Unnecessary Reposition: [{def.Index}] \"{def.Name}\" ({def.Position}) can be deleted.");
                     }
 
-                    if (def.LodDist > 1000)
+                    if (def.LodDist >= 1000)
                     {
                         this.AddIssue(IssueSeverity.Info, file, $"Large LOD Distance: [{def.Index}] \"{def.Name}\" ({def.LodDist})");
                     }
