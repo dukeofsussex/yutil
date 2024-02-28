@@ -41,6 +41,14 @@ Analyse your FiveM stream folder for a variety of common issues.
 yUtil.exe analyse <path/to/directory/with/y-files>
 ```
 
+### List dependencies
+
+Generate a list of YTYP dependencies for YMAPs/YTYPs.
+
+```
+yUtil.exe dep <path/to/directory/with/y-files>
+```
+
 ## Contributing
 
 Any contributions made are welcome and greatly appreciated.

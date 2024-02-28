@@ -44,6 +44,28 @@ calcCommand.SetHandler(async (string dir) =>
 },
 (Argument<string>)calcCommand.Arguments[0]);
 
+Command dependencyCommand = new("dep", "Analyse archetype dependencies")
+{
+    new Argument<string>(
+        name: "dir",
+        description: "Directory to analyse"
+    ),
+    new Option<string>(
+        name: "--ext",
+        description: "File extensions to include",
+        getDefaultValue: () => ".ymap,.ytyp"
+    )
+};
+
+dependencyCommand.SetHandler(async (string dir, string extensions) =>
+{
+    DependencyJob dependencyJob = new(extensions);
+    dependencyJob.Init();
+    await dependencyJob.Run(dir);
+},
+(Argument<string>)dependencyCommand.Arguments[0],
+(Option<string>)dependencyCommand.Options[0]);
+
 Command intersectCommand = new("intersect", "Intersect YMAPs")
 {
     new Argument<string>(
@@ -74,6 +96,7 @@ intersectCommand.SetHandler(async (string dir, string outDir, string ymapName) =
 RootCommand rootCommand = new("A tool to help manage FiveM resources")
 {
     analyseCommand,
+    dependencyCommand,
     new Command("ymaps", "YMAP Commands")
     {
         calcCommand,
