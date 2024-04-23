@@ -18,6 +18,7 @@
         {
             "entityhash",
             "index",
+            "unused5",
         };
         private readonly HashSet<Type> nonRecursiveTypes = new()
         {
@@ -69,11 +70,12 @@
                 
                 if (!files.ContainsKey(name))
                 {
+                    Console.WriteLine($"Base {this.ShortenFilePath(file.FilePath).Pastel(ConsoleColor.DarkCyan)}...");
                     files.Add(name, file);
                     continue;
                 }
 
-                Console.WriteLine($"Intersecting {file.FilePath.Pastel(ConsoleColor.DarkCyan)}...");
+                Console.WriteLine($"Intersecting {this.ShortenFilePath(file.FilePath).Pastel(ConsoleColor.DarkCyan)}...");
 
                 try
                 {
@@ -97,7 +99,7 @@
 
                 await files[name].YmapFile!.SaveFileAsync(this.outDir);
 
-                Console.WriteLine("Saved".Pastel(ConsoleColor.DarkYellow));
+                Console.WriteLine("Saved.".Pastel(ConsoleColor.DarkGreen));
             }
         }
 
@@ -135,11 +137,13 @@
         {
             if (left.AllEntities == null || right.AllEntities == null)
             {
+                Console.WriteLine($"Skipping AllEntities ({"null".Pastel(ConsoleColor.DarkYellow)})...");
                 left.AllEntities = null;
                 return;
             }
 
             List<YmapEntityDef?> entityDefs = left.AllEntities.ToList();
+            int index = -1;
 
             for (int i = 0; i < entityDefs.Count; i++)
             {
@@ -148,45 +152,53 @@
 
                 if (otherDef == null)
                 {
-                    Console.WriteLine($"{right.Name.Pastel(ConsoleColor.DarkCyan)} doesn't contain {entityDef.Name.Pastel(ConsoleColor.DarkYellow)}, skipping...");
+                    Console.WriteLine($"Skipping [{index}] {entityDef.Name.Pastel(ConsoleColor.DarkYellow)} (not in {right.Name.Pastel(ConsoleColor.DarkCyan)})...");
                     entityDefs[i] = null;
                     continue;
                 }
 
+                index++;
+
                 entityDefs[i] = this.Intersect(entityDef, otherDef, (object left, object right, PropertyInfo propInfo) =>
                 {
-                    string nameUpper = propInfo.Name.ToLowerInvariant();
+                    string nameLower = propInfo.Name.ToLowerInvariant();
                     
                     // Can safely be ignored
-                    if (this.ignoredProperties.Contains(nameUpper))
+                    if (this.ignoredProperties.Contains(nameLower))
                     {
                         return;
                     }
 
-                    if (nameUpper.StartsWith("position", StringComparison.CurrentCulture))
+                    if (nameLower.StartsWith("position", StringComparison.CurrentCulture))
                     {
                         Vector3 leftVector = (Vector3)propInfo.GetValue(left);
                         Vector3 rightVector = (Vector3)propInfo.GetValue(right);
 
                         if (leftVector.X == rightVector.X && leftVector.Y == rightVector.Y)
                         {
-                            propInfo.SetValue(left, new Vector3(leftVector.X, rightVector.Y, Math.Min(leftVector.Z, rightVector.Z)));
+                            Vector3 newPosition = new(leftVector.X, leftVector.Y, Math.Min(leftVector.Z, rightVector.Z));
+                            propInfo.SetValue(left, newPosition);
+                            Console.WriteLine($"Adjusted position for [{index}] {entityDef.Name.Pastel(ConsoleColor.DarkYellow)} ({newPosition}).");
                             return;
                         }
                     }
 
-                    if (nameUpper.StartsWith("scale", StringComparison.CurrentCulture))
+                    if (nameLower.StartsWith("scale", StringComparison.CurrentCulture))
                     {
                         object leftValue = propInfo.GetValue(left);
                         object rightValue = propInfo.GetValue(right);
 
                         if (propInfo.PropertyType.Equals(typeof(Vector3)))
                         {
-                            propInfo.SetValue(left, Vector3.Min((Vector3)leftValue, (Vector3)rightValue));
+                            Vector3 newScale = Vector3.Min((Vector3)leftValue, (Vector3)rightValue);
+                            propInfo.SetValue(left, newScale);
+                            Console.WriteLine($"Adjusted scale for [{index}] {entityDef.Name.Pastel(ConsoleColor.DarkYellow)} ({newScale}).");
                         }
                         else
                         {
-                            propInfo.SetValue(left, Math.Min((float)leftValue, (float)rightValue));
+                            float newScale = Math.Min((float)leftValue, (float)rightValue);
+                            propInfo.SetValue(left, newScale);
+                            Console.WriteLine($"Adjusted scale for [{index}] {entityDef.Name.Pastel(ConsoleColor.DarkYellow)} ({newScale}).");
                         }
 
                         //Console.WriteLine(leftValue + " : " + rightValue + " : " + propInfo.Name + " : " + propInfo.PropertyType);
@@ -194,48 +206,59 @@
                         return;
                     }
 
-                    HandleDiff(left, right, entityDef.Name, propInfo);
+                    HandleDiff(left, right, index, entityDef.Name, propInfo);
                 });
             }
 
             left.AllEntities = entityDefs.Where(e => e != null).ToArray();
+
+            Console.WriteLine("Intersected Entities.".Pastel(ConsoleColor.DarkGreen));
         }
 
         private static void IntersectBoxOccluders(YmapFile left, YmapFile right)
         {
             if (left.BoxOccluders == null || right.BoxOccluders == null)
             {
+                Console.WriteLine($"Skipping BoxOccluders ({"null".Pastel(ConsoleColor.DarkYellow)})...");
                 left.BoxOccluders = null;
+                left.CBoxOccluders = null;
                 return;
             }
 
             left.BoxOccluders = left.BoxOccluders.Intersect(right.BoxOccluders, new BoxOccluderComparer())
                 .ToArray();
+
+            Console.WriteLine("Intersected BoxOccluders.".Pastel(ConsoleColor.DarkGreen));
         }
 
         private static void IntersectCarGens(YmapFile left, YmapFile right)
         {
             if (left.CarGenerators == null || right.CarGenerators == null)
             {
+                Console.WriteLine($"Skipping CarGenerators ({"null".Pastel(ConsoleColor.DarkYellow)})...");
                 left.CarGenerators = null;
                 return;
             }
 
             left.CarGenerators = left.CarGenerators.Intersect(right.CarGenerators, new CarGenComparer())
                 .ToArray();
+
+            Console.WriteLine("Intersected CarGenerators.".Pastel(ConsoleColor.DarkGreen));
         }
 
         private static void IntersectOccludeModels(YmapFile left, YmapFile right)
         {
             if (left.OccludeModels == null || right.OccludeModels == null)
             {
+                Console.WriteLine($"Skipping OccludeModels ({"null".Pastel(ConsoleColor.DarkYellow)})...");
                 left.OccludeModels = null;
                 return;
             }
 
             if (left.OccludeModels.Length != right.OccludeModels.Length)
             {
-                Console.WriteLine($"Unable to intersect occlude models ({"differing lengths".Pastel(ConsoleColor.Red)})!");
+                Console.WriteLine($"Skipping OccludeModels ({"differing lengths".Pastel(ConsoleColor.DarkYellow)})...");
+                left.OccludeModels = left.OccludeModels.Length < right.OccludeModels.Length ? left.OccludeModels : right.OccludeModels;
                 return;
             }
 
@@ -244,6 +267,8 @@
                 left.OccludeModels[i].Triangles = left.OccludeModels[i].Triangles.Intersect(right.OccludeModels[i].Triangles, new OccludeModelTriangleComparer())
                     .ToArray();
             }
+
+            Console.WriteLine("Intersected OccludeModels.".Pastel(ConsoleColor.DarkGreen));
         }
 
         private U Intersect<U>(U first, U second, Action<object, object, PropertyInfo> diffHandler)
@@ -283,7 +308,14 @@
                     }
                     else if (leftValue != left)
                     {
-                        propInfo.SetValue(left, RecursiveIntersect(propInfo.GetValue(left), propInfo.GetValue(right)));
+                        try
+                        {
+                            propInfo.SetValue(left, RecursiveIntersect(propInfo.GetValue(left), propInfo.GetValue(right)));
+                        }
+                        catch
+                        {
+                            Console.WriteLine($"Unable to set value on {left}!");
+                        }
                     }
                 }
 
@@ -293,7 +325,7 @@
             return (U)RecursiveIntersect(first, second);
         }
 
-        private static void HandleDiff(object left, object right, string name, PropertyInfo propInfo)
+        private static void HandleDiff(object left, object right, int index, string name, PropertyInfo propInfo)
         {
             object leftValue = propInfo.GetValue(left);
             object rightValue = propInfo.GetValue(right);
@@ -303,7 +335,7 @@
                 return;
             }
 
-            object result = Prompt.Select($"Conflict detected for {name} > {propInfo.Name}", new[] { leftValue, rightValue }, defaultValue: leftValue);
+            object result = Prompt.Select($"Conflict detected for [{index}] {name} > {propInfo.Name}", new[] { leftValue, rightValue }, defaultValue: leftValue);
 
             propInfo.SetValue(left, result);
         }

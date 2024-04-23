@@ -1,6 +1,7 @@
 ﻿namespace yUtil
 {
     using CodeWalker.GameFiles;
+    using SharpDX;
     using System;
     using System.IO;
     using System.Linq;
@@ -185,8 +186,8 @@
             }
 
             // Check position (ignore Z axis shift) and archetype
-            return Math.Abs(left.CEntityDef.position.X - right.CEntityDef.position.X) < Epsilon
-                    && Math.Abs(left.CEntityDef.position.Y - right.CEntityDef.position.Y) < Epsilon
+            return MathUtil.WithinEpsilon(left.CEntityDef.position.X, right.CEntityDef.position.X, Epsilon)
+                    && MathUtil.WithinEpsilon(left.CEntityDef.position.Y, right.CEntityDef.position.Y, Epsilon)
                     && left.CEntityDef.archetypeName.Hash == right.CEntityDef.archetypeName.Hash;
         }
     }

@@ -10,6 +10,8 @@
 
         protected abstract HashSet<string> Extensions { get; set; }
 
+        protected string RunDir { get; private set; }
+
         public virtual void Init()
         {
             string? gtaDir = Environment.GetEnvironmentVariable("GTA_DIR");
@@ -31,6 +33,8 @@
 
         public async Task Run(string dir, string pattern = "*.y*")
         {
+            this.RunDir = dir;
+
             foreach (string file in Directory.EnumerateFiles(dir, pattern, SearchOption.AllDirectories))
             {
                 string ext = Path.GetExtension(file);
@@ -44,7 +48,8 @@
 
                 if (this.Extensions.Contains(ext))
                 {
-                    Write($"Processing {file[(file.Length - Math.Min(file.Length, Console.BufferWidth - 15))..].Pastel(ConsoleColor.DarkCyan)}...");
+                    string shortened = ShortenFilePath(file);
+                    Write($"Processing {shortened[(shortened.Length - Math.Min(shortened.Length, Console.BufferWidth - 15))..].Pastel(ConsoleColor.DarkCyan)}...");
                     JenkIndex.Ensure(Path.GetFileName(file));
                     JenkIndex.Ensure(Path.GetFileNameWithoutExtension(file));
 
@@ -52,6 +57,7 @@
                 }                
             }
 
+            Write("Processed.".Pastel(ConsoleColor.DarkGreen));
             Console.WriteLine();
 
             await this.FinishAsync();
@@ -60,6 +66,8 @@
         protected abstract Task FinishAsync();
 
         protected abstract Task HandleFileAsync(string file);
+
+        protected string ShortenFilePath(string path) => $".{path[this.RunDir.Length..]}";
 
         protected static void Write(string text)
         {
