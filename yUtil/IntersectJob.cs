@@ -9,11 +9,11 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Text.RegularExpressions;
     using yUtil.Intersection;
 
     internal class IntersectJob : Job
     {
-        private readonly bool checkYmapName;
         private readonly HashSet<string> ignoredProperties = new()
         {
             "entityhash",
@@ -29,7 +29,7 @@
             typeof(Quaternion),
         };
         private readonly string outDir;
-        private readonly string ymapName;
+        private readonly Regex ymapName;
         private readonly List<LazyYmapFile> ymaps = new();
 
         protected override HashSet<string> Extensions { get; set; }
@@ -41,14 +41,12 @@
                 ".ymap",
             };
             this.outDir = outDir;
-            this.ymapName = ymapName;
-            this.checkYmapName = !string.IsNullOrEmpty(ymapName);
+            this.ymapName = new Regex($".*{ymapName.Replace(".ymap", string.Empty).Replace("*", ".*")}\\.ymap$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         }
 
         protected override Task HandleFileAsync(string file)
         {
-            if ((!this.checkYmapName || file.EndsWith(this.ymapName, StringComparison.CurrentCulture))
-                && !file.StartsWith(this.outDir, StringComparison.CurrentCulture))
+            if (this.ymapName.IsMatch(file) && !file.StartsWith(this.outDir, StringComparison.CurrentCulture))
             {
                 this.ymaps.Add(new()
                 {

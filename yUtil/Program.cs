@@ -78,14 +78,14 @@ Command intersectCommand = new("intersect", "Intersect YMAPs")
     ),
     new Option<string>(
         name: "--ymap",
-        description: "YMAP name to intersect",
-        getDefaultValue: () => string.Empty
+        description: "YMAP to intersect",
+        getDefaultValue: () => "*.ymap"
     )
 };
 
 intersectCommand.SetHandler(async (string dir, string outDir, string ymapName) =>
 {
-    IntersectJob intersectJob = new(outDir, $"{ymapName.Replace(".ymap", string.Empty)}.ymap");
+    IntersectJob intersectJob = new(outDir, ymapName);
     intersectJob.Init();
     await intersectJob.Run(dir);
 },
