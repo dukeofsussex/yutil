@@ -253,18 +253,35 @@
                 return;
             }
 
-            if (left.OccludeModels.Length != right.OccludeModels.Length)
-            {
-                Console.WriteLine($"Skipping OccludeModels ({"differing lengths".Pastel(ConsoleColor.DarkYellow)})...");
-                left.OccludeModels = left.OccludeModels.Length < right.OccludeModels.Length ? left.OccludeModels : right.OccludeModels;
-                return;
-            }
+            List<YmapOccludeModel> intersectedOccludeModels = new();
 
             for (int i = 0; i < left.OccludeModels.Length; i++)
             {
-                left.OccludeModels[i].Triangles = left.OccludeModels[i].Triangles.Intersect(right.OccludeModels[i].Triangles, new OccludeModelTriangleComparer())
-                    .ToArray();
+                YmapOccludeModel leftOccludeModel = left.OccludeModels[i];
+                YmapOccludeModel rightOccludeModel = right.OccludeModels.Where(om => MathUtil.WithinEpsilon(leftOccludeModel.OccludeModel.bmax.X, om.OccludeModel.bmax.X, 1)
+                        && MathUtil.WithinEpsilon(leftOccludeModel.OccludeModel.bmax.Y, om.OccludeModel.bmax.Y, 1)
+                        && MathUtil.WithinEpsilon(leftOccludeModel.OccludeModel.bmax.Z, om.OccludeModel.bmax.Z, 1)
+                        && MathUtil.WithinEpsilon(leftOccludeModel.OccludeModel.bmin.X, om.OccludeModel.bmin.X, 1)
+                        && MathUtil.WithinEpsilon(leftOccludeModel.OccludeModel.bmin.Y, om.OccludeModel.bmin.Y, 1)
+                        && MathUtil.WithinEpsilon(leftOccludeModel.OccludeModel.bmin.Z, om.OccludeModel.bmin.Z, 1))
+                    .FirstOrDefault();
+
+                if (rightOccludeModel != null) {
+                    leftOccludeModel.Triangles = leftOccludeModel.Triangles.Intersect(rightOccludeModel.Triangles, new OccludeModelTriangleComparer())
+                        .ToArray();
+                    
+                    if (leftOccludeModel.Triangles.Length > 0)
+                    {
+                        intersectedOccludeModels.Add(leftOccludeModel);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Removed OccludeModel ({"no triangles".Pastel(ConsoleColor.DarkYellow)})...");
+                    }
+                }
             }
+
+            left.OccludeModels = intersectedOccludeModels.ToArray();
 
             Console.WriteLine("Intersected OccludeModels.".Pastel(ConsoleColor.DarkGreen));
         }
