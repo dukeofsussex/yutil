@@ -100,6 +100,19 @@
 
                             dependencies.Add(entityDef.Name, this.cache.Archetypes.ContainsKey(entityDef.Data.archetypeName.Hash) ? this.cache.Archetypes[entityDef.Data.archetypeName.Hash].Ytyp.Name : "_Unknown_");
                         }
+
+                        foreach (MCMloEntitySet entitySet in mloArchetype.entitySets)
+                        {
+                            foreach (MCEntityDef entityDef in entitySet.Entities)
+                            {
+                                if (dependencies.ContainsKey(entityDef.Name))
+                                {
+                                    continue;
+                                }
+
+                                dependencies.Add(entityDef.Name, this.cache.Archetypes.ContainsKey(entityDef.Data.archetypeName.Hash) ? this.cache.Archetypes[entityDef.Data.archetypeName.Hash].Ytyp.Name : "_Unknown_");
+                            }
+                        }
                     }
                 }
                 else
