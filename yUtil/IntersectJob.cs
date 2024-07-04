@@ -172,36 +172,42 @@
                         Vector3 leftVector = (Vector3)propInfo.GetValue(left);
                         Vector3 rightVector = (Vector3)propInfo.GetValue(right);
 
-                        if (leftVector.X == rightVector.X && leftVector.Y == rightVector.Y)
+                        if (leftVector.X == rightVector.X && leftVector.Y == rightVector.Y && leftVector.Z != rightVector.Z)
                         {
                             Vector3 newPosition = new(leftVector.X, leftVector.Y, Math.Min(leftVector.Z, rightVector.Z));
                             propInfo.SetValue(left, newPosition);
                             Console.WriteLine($"Adjusted position for [{index}] {entityDef.Name.Pastel(ConsoleColor.DarkYellow)} ({newPosition}).");
+
                             return;
                         }
                     }
-
-                    if (nameLower.StartsWith("scale", StringComparison.CurrentCulture))
+                    else if (nameLower.StartsWith("scale", StringComparison.CurrentCulture) && propInfo.PropertyType.Equals(typeof(Vector3)))
                     {
-                        object leftValue = propInfo.GetValue(left);
-                        object rightValue = propInfo.GetValue(right);
+                        Vector3 leftValue = (Vector3)propInfo.GetValue(left);
+                        Vector3 rightValue = (Vector3)propInfo.GetValue(right);
 
-                        if (propInfo.PropertyType.Equals(typeof(Vector3)))
+                        if (leftValue != rightValue)
                         {
-                            Vector3 newScale = Vector3.Min((Vector3)leftValue, (Vector3)rightValue);
+                            Vector3 newScale = Vector3.Min(leftValue, rightValue);
                             propInfo.SetValue(left, newScale);
                             Console.WriteLine($"Adjusted scale for [{index}] {entityDef.Name.Pastel(ConsoleColor.DarkYellow)} ({newScale}).");
+
+                            return;
                         }
-                        else
+                    }
+                    else if (nameLower.StartsWith("scale", StringComparison.CurrentCulture) && propInfo.PropertyType.Equals(typeof(float)))
+                    {
+                        float leftValue = (float)propInfo.GetValue(left);
+                        float rightValue = (float)propInfo.GetValue(right);
+
+                        if (leftValue != rightValue)
                         {
                             float newScale = Math.Min((float)leftValue, (float)rightValue);
                             propInfo.SetValue(left, newScale);
                             Console.WriteLine($"Adjusted scale for [{index}] {entityDef.Name.Pastel(ConsoleColor.DarkYellow)} ({newScale}).");
+
+                            return;
                         }
-
-                        //Console.WriteLine(leftValue + " : " + rightValue + " : " + propInfo.Name + " : " + propInfo.PropertyType);
-
-                        return;
                     }
 
                     HandleDiff(left, right, index, entityDef.Name, propInfo);
