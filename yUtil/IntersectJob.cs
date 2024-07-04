@@ -40,13 +40,13 @@
             {
                 ".ymap",
             };
-            this.outDir = outDir;
+            this.outDir = Path.GetFullPath(outDir);
             this.ymapName = new Regex($".*{ymapName.Replace(".ymap", string.Empty).Replace("*", ".*")}\\.ymap$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         }
 
         protected override Task HandleFileAsync(string file)
         {
-            if (this.ymapName.IsMatch(file) && !file.StartsWith(this.outDir, StringComparison.CurrentCulture))
+            if (this.ymapName.IsMatch(file) && !Path.GetFullPath(file).StartsWith(this.outDir, StringComparison.OrdinalIgnoreCase))
             {
                 this.ymaps.Add(new()
                 {
