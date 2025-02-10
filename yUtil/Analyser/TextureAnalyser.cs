@@ -65,6 +65,8 @@
 
             foreach (Texture texture in textures)
             {
+                bool isScriptDial = (texture.Format is TextureFormat.D3DFMT_A8R8G8B8 or TextureFormat.D3DFMT_A8B8G8R8) && texture.Name.StartsWith("script_rt_", StringComparison.Ordinal);
+
                 if (texture.Height > 1024 || texture.Width > 1024)
                 {
                     this.AddIssue(IssueSeverity.Warn, file, $"Size: {texture.Name}.dds ({texture.Width}x{texture.Height})");
@@ -75,16 +77,20 @@
                     this.AddIssue(IssueSeverity.Error, file, $"Dimensions: {texture.Name}.dds ({texture.Width}x{texture.Height})");
                 }
 
-                if (texture.Format is not TextureFormat.D3DFMT_DXT1 and not TextureFormat.D3DFMT_DXT5)
+                if ((texture.Format is not TextureFormat.D3DFMT_DXT1 and not TextureFormat.D3DFMT_DXT5) && !isScriptDial)
                 {
                     this.AddIssue(IssueSeverity.Warn, file, $"Format: {texture.Name}.dds ({texture.Format})");
                 }
 
                 double requiredLevels = Math.Ceiling(Math.Log2(Math.Min(texture.Width, texture.Height))) - 1;
 
-                if (texture.Levels < requiredLevels)
+                if (texture.Levels < requiredLevels && !isScriptDial)
                 {
                     this.AddIssue(IssueSeverity.Error, file, $"Missing Mipmaps: {texture.Name}.dds ({texture.Levels}/{requiredLevels})");
+                }
+                else if (texture.Levels > requiredLevels)
+                {
+                    this.AddIssue(IssueSeverity.Error, file, $"Excessive Mipmaps: {texture.Name}.dds ({texture.Levels}/{requiredLevels})");
                 }
 
                 if (texture.MemoryUsage > 10000000f)
