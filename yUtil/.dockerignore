@@ -1,0 +1,9 @@
+# VS
+bin/
+obj/
+Properties/
+*.user
+
+# Environment variables
+.env
+.env.*
