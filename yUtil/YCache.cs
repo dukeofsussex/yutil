@@ -1,6 +1,7 @@
-﻿namespace yUtil
+namespace yUtil
 {
     using CodeWalker.GameFiles;
+    using Pastel;
     using System;
     using System.Collections.Generic;
 
@@ -17,20 +18,33 @@
 
         public YCache()
         {
-            this.RpfManager = new ()
+            this.RpfManager = new()
             {
                 BuildExtendedJenkIndex = true,
                 EnableMods = true,
             };
         }
 
-        public void Init(string dir, Action<string> updateStatus, Action<string> errorLog)
+        public void Init(Action<string> updateStatus, Action<string> errorLog)
         {
+            if (CI.Enabled)
+            {
+                Console.WriteLine("[CI] Ignoring GTA directory...".Pastel(ConsoleColor.DarkYellow));
+                return;
+            }
+
+            string? gtaDir = Environment.GetEnvironmentVariable("GTA_DIR");
+
+            if (string.IsNullOrEmpty(gtaDir))
+            {
+                throw new IOException("Missing GTA directory!");
+            }
+
             this.UpdateStatus = updateStatus;
             this.ErrorLog = errorLog;
 
-            GTA5Keys.LoadFromPath(dir);
-            this.RpfManager.Init(dir, updateStatus, errorLog);
+            GTA5Keys.LoadFromPath(gtaDir);
+            this.RpfManager.Init(gtaDir, updateStatus, errorLog);
 
             this.UpdateStatus("Building cache...");
 

@@ -1,14 +1,12 @@
-﻿namespace yUtil.Analyser
+namespace yUtil.Analyser
 {
     using CodeWalker.GameFiles;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using yUtil;
 
-    internal class YtypAnalyser : Analyser
+    internal class YtypAnalyser(YCache cache) : Analyser(cache)
     {
-        public YtypAnalyser(YCache cache) : base(cache) { }
-
         private readonly Dictionary<uint, Archetype> customArchetypes = [];
 
         public override HashSet<string> SupportedExtensions =>

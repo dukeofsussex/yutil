@@ -1,10 +1,11 @@
-﻿using dotenv.net;
+using dotenv.net;
 using Pastel;
 using System.CommandLine;
 using yUtil;
 using yUtil.Analyser;
 
 DotEnv.Load();
+CI.Load();
 
 Command analyseCommand = new("analyse", "Analyse resources for conflicts")
 {
@@ -114,4 +115,4 @@ catch (Exception e)
     return 1;
 }
 
-return 0;
+return CI.Enabled ? CI.ExitCode : 0;

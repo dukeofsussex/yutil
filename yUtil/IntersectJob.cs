@@ -1,4 +1,4 @@
-﻿namespace yUtil
+namespace yUtil
 {
     using CodeWalker.GameFiles;
     using Pastel;
@@ -12,7 +12,7 @@
     using System.Text.RegularExpressions;
     using yUtil.Intersection;
 
-    internal class IntersectJob : Job
+    internal class IntersectJob(string outDir, string ymapName) : Job
     {
         private readonly HashSet<string> ignoredProperties =
         [
@@ -28,20 +28,22 @@
             typeof(Vector4),
             typeof(Quaternion),
         ];
-        private readonly string outDir;
-        private readonly Regex ymapName;
+        private readonly string outDir = Path.GetFullPath(outDir);
+        private readonly Regex ymapName = new($".*{ymapName.Replace(".ymap", string.Empty).Replace("*", ".*")}\\.ymap$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly List<LazyYmapFile> ymaps = [];
 
-        protected override HashSet<string> Extensions { get; set; }
+        protected override HashSet<string> Extensions { get; set; } =
+        [
+            ".ymap",
+        ];
 
-        public IntersectJob(string outDir, string ymapName)
+        public override void Init()
         {
-            this.Extensions =
-            [
-                ".ymap",
-            ];
-            this.outDir = Path.GetFullPath(outDir);
-            this.ymapName = new Regex($".*{ymapName.Replace(".ymap", string.Empty).Replace("*", ".*")}\\.ymap$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            if (CI.Enabled)
+            {
+                throw new NotSupportedException("[CI] Cannot intersect YMAPs in CI mode!");
+            }
+            base.Init();
         }
 
         protected override Task HandleFileAsync(string file)
@@ -65,7 +67,7 @@
             {
                 LazyYmapFile file = this.ymaps[i];
                 string name = Path.GetFileName(file.FilePath);
-                
+
                 if (!files.ContainsKey(name))
                 {
                     Console.WriteLine($"Base {this.ShortenFilePath(file.FilePath).Pastel(ConsoleColor.DarkCyan)}...");
@@ -84,7 +86,7 @@
                     files[name] = file;
                     continue;
                 }
-                
+
 
                 if (!Directory.Exists(this.outDir))
                 {
@@ -140,7 +142,7 @@
                 return;
             }
 
-            List<YmapEntityDef?> entityDefs = left.AllEntities.ToList();
+            List<YmapEntityDef?> entityDefs = [.. left.AllEntities];
             int index = -1;
 
             for (int i = 0; i < entityDefs.Count; i++)
@@ -160,7 +162,7 @@
                 entityDefs[i] = this.Intersect(entityDef, otherDef, (object left, object right, PropertyInfo propInfo) =>
                 {
                     string nameLower = propInfo.Name.ToLowerInvariant();
-                    
+
                     // Can safely be ignored
                     if (this.ignoredProperties.Contains(nameLower))
                     {
@@ -214,7 +216,7 @@
                 });
             }
 
-            left.AllEntities = entityDefs.Where(e => e != null).ToArray();
+            left.AllEntities = [.. entityDefs.Where(e => e != null)];
 
             Console.WriteLine("Intersected Entities.".Pastel(ConsoleColor.DarkGreen));
         }
@@ -229,8 +231,7 @@
                 return;
             }
 
-            left.BoxOccluders = left.BoxOccluders.Intersect(right.BoxOccluders, new BoxOccluderComparer())
-                .ToArray();
+            left.BoxOccluders = [.. left.BoxOccluders.Intersect(right.BoxOccluders, new BoxOccluderComparer())];
 
             Console.WriteLine("Intersected BoxOccluders.".Pastel(ConsoleColor.DarkGreen));
         }
@@ -244,8 +245,7 @@
                 return;
             }
 
-            left.CarGenerators = left.CarGenerators.Intersect(right.CarGenerators, new CarGenComparer())
-                .ToArray();
+            left.CarGenerators = [.. left.CarGenerators.Intersect(right.CarGenerators, new CarGenComparer())];
 
             Console.WriteLine("Intersected CarGenerators.".Pastel(ConsoleColor.DarkGreen));
         }
@@ -272,10 +272,10 @@
                         && MathUtil.WithinEpsilon(leftOccludeModel.OccludeModel.bmin.Z, om.OccludeModel.bmin.Z, 1))
                     .FirstOrDefault();
 
-                if (rightOccludeModel != null) {
-                    leftOccludeModel.Triangles = leftOccludeModel.Triangles.Intersect(rightOccludeModel.Triangles, new OccludeModelTriangleComparer())
-                        .ToArray();
-                    
+                if (rightOccludeModel != null)
+                {
+                    leftOccludeModel.Triangles = [.. leftOccludeModel.Triangles.Intersect(rightOccludeModel.Triangles, new OccludeModelTriangleComparer())];
+
                     if (leftOccludeModel.Triangles.Length > 0)
                     {
                         intersectedOccludeModels.Add(leftOccludeModel);
@@ -287,7 +287,7 @@
                 }
             }
 
-            left.OccludeModels = intersectedOccludeModels.ToArray();
+            left.OccludeModels = [.. intersectedOccludeModels];
 
             Console.WriteLine("Intersected OccludeModels.".Pastel(ConsoleColor.DarkGreen));
         }
@@ -356,7 +356,7 @@
                 return;
             }
 
-            object result = Prompt.Select($"Conflict detected for [{index}] {name} > {propInfo.Name}", new[] { leftValue, rightValue }, defaultValue: leftValue);
+            object result = Prompt.Select($"Conflict detected for [{index}] {name} > {propInfo.Name}", [leftValue, rightValue], defaultValue: leftValue);
 
             propInfo.SetValue(left, result);
         }

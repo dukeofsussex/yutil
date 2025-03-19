@@ -1,8 +1,9 @@
-﻿namespace yUtil
+namespace yUtil
 {
     using Pastel;
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -10,16 +11,11 @@
     using System.Threading.Tasks;
     using yUtil.Analyser;
 
-    internal class AnalysisJob : Job
+    internal class AnalysisJob(string extensions) : Job
     {
         private Dictionary<string, List<IAnalyser>> analysers = [];
 
-        protected override HashSet<string> Extensions { get; set; }
-
-        public AnalysisJob(string extensions)
-        {
-            this.Extensions = extensions.Split(',').ToHashSet();
-        }
+        protected override HashSet<string> Extensions { get; set; } = [.. extensions.Split(',')];
 
         public override void Init()
         {
@@ -59,6 +55,7 @@
                     .ThenBy(x => x.Message));
 
             StringBuilder builder = new();
+            int ciExitCode = CI.ExitCode;
 
             foreach (KeyValuePair<string, IOrderedEnumerable<Issue>> file in fileIssues)
             {
@@ -70,17 +67,28 @@
 
                 foreach (Issue issue in file.Value)
                 {
-                    builder.AppendLine($"[{issue.Severity.ToString().ToUpperInvariant()}] {issue.Message}");
+                    if (ciExitCode != 1 && issue.Severity > IssueSeverity.Info)
+                    {
+                        ciExitCode = issue.Severity == IssueSeverity.Error ? 1 : 2;
+                    }
+
+                    builder.AppendLine(CultureInfo.InvariantCulture, $"[{issue.Severity.ToString().ToUpperInvariant()}] {issue.Message}");
                 }
 
                 builder.AppendLine();
             }
 
-            string reportFile = Path.Combine(Directory.GetCurrentDirectory(), $"{DateTime.Now:yyyy_MM_dd-HH_mm_ss}-analysis.txt");
-
-            Write($"Writing results to {reportFile.Pastel(ConsoleColor.DarkCyan)}...");
-
-            await File.WriteAllTextAsync(reportFile, builder.ToString());
+            if (CI.Enabled)
+            {
+                Console.Write(builder.ToString());
+                CI.ExitCode = ciExitCode;
+            }
+            else
+            {
+                string reportFile = Path.Combine(Directory.GetCurrentDirectory(), $"{DateTime.Now:yyyy_MM_dd-HH_mm_ss}-analysis.txt");
+                Write($"Writing results to {reportFile.Pastel(ConsoleColor.DarkCyan)}...");
+                await File.WriteAllTextAsync(reportFile, builder.ToString());
+            }
         }
     }
 }

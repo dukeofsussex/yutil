@@ -1,29 +1,27 @@
-﻿namespace yUtil
+namespace yUtil
 {
     using CodeWalker.GameFiles;
     using Pastel;
-    using SharpDX;
-    using Sharprompt;
     using System;
-    using System.Collections;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
-    using System.Reflection;
-    using System.Security.AccessControl;
     using System.Text;
-    using yUtil.Analyser;
-    using yUtil.Intersection;
-    using static System.Net.Mime.MediaTypeNames;
 
-    internal class DependencyJob : Job
+    internal class DependencyJob(string extensions) : Job
     {
-        protected override HashSet<string> Extensions { get; set; }
+        protected override HashSet<string> Extensions { get; set; } = [.. extensions.Split(',')];
 
         private readonly List<GameFile> files = [];
 
-        public DependencyJob(string extensions)
+        public override void Init()
         {
-            this.Extensions = extensions.Split(',').ToHashSet();
+            if (CI.Enabled)
+            {
+                throw new NotSupportedException("[CI] Cannot determine dependencies in CI mode!");
+            }
+
+            base.Init();
         }
 
         protected override async Task HandleFileAsync(string file)
@@ -138,7 +136,7 @@
                 {
                     foreach (string prop in dep.Value)
                     {
-                        sb.AppendLine($"{dep.Key}: {prop}");
+                        sb.AppendLine(CultureInfo.InvariantCulture, $"{dep.Key}: {prop}");
                     }
                 }
             }

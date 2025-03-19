@@ -1,4 +1,4 @@
-﻿namespace yUtil.Analyser
+namespace yUtil.Analyser
 {
     internal struct Issue
     {

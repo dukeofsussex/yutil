@@ -1,4 +1,4 @@
-﻿namespace yUtil.Analyser
+namespace yUtil.Analyser
 {
     using CodeWalker.GameFiles;
     using SharpDX;
@@ -14,20 +14,6 @@
 
         public override async Task AnalyseAsync(string file)
         {
-            string name = Path.GetFileName(file);
-
-            RpfEntry entry = this.cache.CoreFiles.FirstOrDefault(e => e.Key == JenkHash.GenHash(name)).Value;
-
-            if (entry == null)
-            {
-                return;
-            }
-
-            RpfFileEntry rpfFileEntry = (RpfFileEntry)entry;
-
-            YmapFile ogYmap = new();
-            ogYmap.Load(entry.File.ExtractFile(rpfFileEntry), rpfFileEntry);
-
             YmapFile modYmap = new();
             await modYmap.LoadFileAsync(file, this.cache);
 
@@ -49,6 +35,20 @@
             {
                 this.AddIssue(IssueSeverity.Warn, file, $"Extents: Large area ({extents:F2})");
             }
+
+            string name = Path.GetFileName(file);
+
+            RpfEntry entry = this.cache.CoreFiles.FirstOrDefault(e => e.Key == JenkHash.GenHash(name)).Value;
+
+            if (entry == null)
+            {
+                return;
+            }
+
+            RpfFileEntry rpfFileEntry = (RpfFileEntry)entry;
+
+            YmapFile ogYmap = new();
+            ogYmap.Load(entry.File.ExtractFile(rpfFileEntry), rpfFileEntry);
 
             if (ogYmap.AllEntities == null)
             {

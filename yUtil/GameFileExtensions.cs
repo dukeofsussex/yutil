@@ -1,4 +1,4 @@
-﻿namespace yUtil
+namespace yUtil
 {
     using CodeWalker.GameFiles;
     using SharpDX;

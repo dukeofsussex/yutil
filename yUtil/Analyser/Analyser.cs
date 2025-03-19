@@ -1,10 +1,10 @@
-﻿namespace yUtil.Analyser
+namespace yUtil.Analyser
 {
-    internal abstract class Analyser : IAnalyser
+    internal abstract class Analyser(YCache cache) : IAnalyser
     {
-        protected readonly YCache cache;
+        protected readonly YCache cache = cache;
 
-        public Dictionary<string, List<Issue>> Issues { get; }
+        public Dictionary<string, List<Issue>> Issues { get; } = [];
 
         public static HashSet<string> DefaultExtensions =>
         [
@@ -30,12 +30,6 @@
             ".yvr",
             ".ywr",
         ];
-
-        public Analyser(YCache cache)
-        {
-            this.cache = cache;
-            this.Issues = [];
-        }
 
         protected void AddIssue(IssueSeverity severity, string file, string message)
         {

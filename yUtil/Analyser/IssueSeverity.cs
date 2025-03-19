@@ -1,4 +1,4 @@
-﻿namespace yUtil.Analyser
+namespace yUtil.Analyser
 {
     public enum IssueSeverity
     {

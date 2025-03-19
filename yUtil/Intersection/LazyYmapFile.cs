@@ -1,4 +1,4 @@
-﻿namespace yUtil.Intersection
+namespace yUtil.Intersection
 {
     using CodeWalker.GameFiles;
 

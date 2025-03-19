@@ -1,14 +1,12 @@
-﻿namespace yUtil.Analyser
+namespace yUtil.Analyser
 {
     using System.Collections.Generic;
 
-    internal class DuplicateAnalyser : Analyser
+    internal class DuplicateAnalyser(YCache cache) : Analyser(cache)
     {
         private readonly Dictionary<string, string> files = [];
 
-        public DuplicateAnalyser(YCache cache) : base(cache) { }
-
-        public override HashSet<string> SupportedExtensions => DefaultExtensions;
+        public override HashSet<string> SupportedExtensions => CI.Enabled ? [] : DefaultExtensions;
 
         public override Task AnalyseAsync(string file)
         {

@@ -1,4 +1,4 @@
-﻿namespace yUtil
+namespace yUtil
 {
     using CodeWalker.GameFiles;
     using Pastel;
@@ -10,19 +10,11 @@
 
         protected abstract HashSet<string> Extensions { get; set; }
 
-        protected string RunDir { get; private set; }
+        protected string? RunDir { get; private set; }
 
         public virtual void Init()
         {
-            string? gtaDir = Environment.GetEnvironmentVariable("GTA_DIR");
-
-            if (string.IsNullOrEmpty(gtaDir))
-            {
-                throw new IOException("Please configure the .env file!");
-            }
-
             this.cache.Init(
-                gtaDir,
                 (string u) => Write(u[..Math.Min(u.Length, Console.BufferWidth)]),
                 (string err) => Console.WriteLine(err.Pastel(ConsoleColor.DarkRed))
             );
@@ -54,7 +46,7 @@
                     JenkIndex.Ensure(Path.GetFileNameWithoutExtension(file));
 
                     await this.HandleFileAsync(file);
-                }                
+                }
             }
 
             Write("Processed.".Pastel(ConsoleColor.DarkGreen));

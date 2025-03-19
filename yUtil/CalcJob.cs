@@ -1,4 +1,4 @@
-﻿namespace yUtil
+namespace yUtil
 {
     using CodeWalker.GameFiles;
     using Pastel;
@@ -18,6 +18,16 @@
             [
                 ".ymap"
             ];
+        }
+
+        public override void Init()
+        {
+            if (CI.Enabled)
+            {
+                throw new NotSupportedException("[CI] Cannot calculate YMAP extents in CI mode!");
+            }
+
+            base.Init();
         }
 
         protected override Task HandleFileAsync(string file)
@@ -50,7 +60,7 @@
                         }
                     }
                 }
-                
+
                 if (ymapFile.CalcExtents() || ymapFile.CalcFlags())
                 {
                     Console.WriteLine("Changed".Pastel(ConsoleColor.DarkYellow));

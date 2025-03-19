@@ -1,14 +1,12 @@
-﻿namespace yUtil.Analyser
+namespace yUtil.Analyser
 {
     using CodeWalker.GameFiles;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using yUtil;
 
-    internal class TextureAnalyser : Analyser
+    internal class TextureAnalyser(YCache cache) : Analyser(cache)
     {
-        public TextureAnalyser(YCache cache) : base(cache) { }
-
         public override HashSet<string> SupportedExtensions =>
         [
             ".ydr",
