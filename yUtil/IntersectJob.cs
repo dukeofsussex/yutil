@@ -14,32 +14,32 @@
 
     internal class IntersectJob : Job
     {
-        private readonly HashSet<string> ignoredProperties = new()
-        {
+        private readonly HashSet<string> ignoredProperties =
+        [
             "entityhash",
             "index",
             "unused5",
-        };
-        private readonly HashSet<Type> nonRecursiveTypes = new()
-        {
+        ];
+        private readonly HashSet<Type> nonRecursiveTypes =
+        [
             typeof(string),
             typeof(Vector2),
             typeof(Vector3),
             typeof(Vector4),
             typeof(Quaternion),
-        };
+        ];
         private readonly string outDir;
         private readonly Regex ymapName;
-        private readonly List<LazyYmapFile> ymaps = new();
+        private readonly List<LazyYmapFile> ymaps = [];
 
         protected override HashSet<string> Extensions { get; set; }
 
         public IntersectJob(string outDir, string ymapName)
         {
-            this.Extensions = new()
-            {
+            this.Extensions =
+            [
                 ".ymap",
-            };
+            ];
             this.outDir = Path.GetFullPath(outDir);
             this.ymapName = new Regex($".*{ymapName.Replace(".ymap", string.Empty).Replace("*", ".*")}\\.ymap$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         }
@@ -59,7 +59,7 @@
 
         protected override async Task FinishAsync()
         {
-            Dictionary<string, LazyYmapFile> files = new();
+            Dictionary<string, LazyYmapFile> files = [];
 
             for (int i = 0; i < this.ymaps.Count; i++)
             {
@@ -259,7 +259,7 @@
                 return;
             }
 
-            List<YmapOccludeModel> intersectedOccludeModels = new();
+            List<YmapOccludeModel> intersectedOccludeModels = [];
 
             for (int i = 0; i < left.OccludeModels.Length; i++)
             {

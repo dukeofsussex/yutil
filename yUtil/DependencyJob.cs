@@ -19,7 +19,7 @@
     {
         protected override HashSet<string> Extensions { get; set; }
 
-        private readonly List<GameFile> files = new();
+        private readonly List<GameFile> files = [];
 
         public DependencyJob(string extensions)
         {
@@ -60,7 +60,7 @@
 
             for (int i = 0; i < this.files.Count; i++)
             {
-                Dictionary<string, string> dependencies = new();
+                Dictionary<string, string> dependencies = [];
                 GameFile file = this.files[i];
 
                 Write($"Determining dependencies for {file.Name.Pastel(ConsoleColor.DarkCyan)}...");

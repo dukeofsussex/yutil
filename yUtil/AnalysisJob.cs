@@ -12,7 +12,7 @@
 
     internal class AnalysisJob : Job
     {
-        private Dictionary<string, List<IAnalyser>> analysers = new();
+        private Dictionary<string, List<IAnalyser>> analysers = [];
 
         protected override HashSet<string> Extensions { get; set; }
 

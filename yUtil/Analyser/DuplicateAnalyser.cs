@@ -4,7 +4,7 @@
 
     internal class DuplicateAnalyser : Analyser
     {
-        private readonly Dictionary<string, string> files = new();
+        private readonly Dictionary<string, string> files = [];
 
         public DuplicateAnalyser(YCache cache) : base(cache) { }
 

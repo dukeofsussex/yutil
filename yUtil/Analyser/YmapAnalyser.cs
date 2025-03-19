@@ -5,14 +5,12 @@
     using System.Collections.Generic;
     using yUtil;
 
-    internal class YmapAnalyser : Analyser
+    internal class YmapAnalyser(YCache cache) : Analyser(cache)
     {
-        public YmapAnalyser(YCache cache) : base(cache) { }
-
-        public override HashSet<string> SupportedExtensions => new()
-        {
+        public override HashSet<string> SupportedExtensions =>
+        [
             ".ymap"
-        };
+        ];
 
         public override async Task AnalyseAsync(string file)
         {
@@ -25,7 +23,7 @@
                 return;
             }
 
-            RpfFileEntry rpfFileEntry = entry as RpfFileEntry;
+            RpfFileEntry rpfFileEntry = (RpfFileEntry)entry;
 
             YmapFile ogYmap = new();
             ogYmap.Load(entry.File.ExtractFile(rpfFileEntry), rpfFileEntry);

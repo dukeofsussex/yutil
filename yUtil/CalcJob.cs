@@ -8,16 +8,16 @@
 
     internal class CalcJob : Job
     {
-        private readonly List<string> ymaps = new();
+        private readonly List<string> ymaps = [];
 
         protected override HashSet<string> Extensions { get; set; }
 
         public CalcJob()
         {
-            this.Extensions = new()
-            {
+            this.Extensions =
+            [
                 ".ymap"
-            };
+            ];
         }
 
         protected override Task HandleFileAsync(string file)

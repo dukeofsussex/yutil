@@ -9,12 +9,12 @@
     {
         public YtypAnalyser(YCache cache) : base(cache) { }
 
-        private readonly Dictionary<uint, Archetype> customArchetypes = new();
+        private readonly Dictionary<uint, Archetype> customArchetypes = [];
 
-        public override HashSet<string> SupportedExtensions => new()
-        {
+        public override HashSet<string> SupportedExtensions =>
+        [
             ".ytyp",
-        };
+        ];
 
         public override async Task AnalyseAsync(string file)
         {

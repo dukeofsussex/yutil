@@ -6,8 +6,8 @@
 
         public Dictionary<string, List<Issue>> Issues { get; }
 
-        public static HashSet<string> DefaultExtensions => new()
-        {
+        public static HashSet<string> DefaultExtensions =>
+        [
             ".ybd",
             ".ybn",
             ".ycd",
@@ -29,19 +29,19 @@
             ".ytyp",
             ".yvr",
             ".ywr",
-        };
+        ];
 
         public Analyser(YCache cache)
         {
             this.cache = cache;
-            this.Issues = new();
+            this.Issues = [];
         }
 
         protected void AddIssue(IssueSeverity severity, string file, string message)
         {
             if (!this.Issues.ContainsKey(file))
             {
-                this.Issues[file] = new();
+                this.Issues[file] = [];
             }
 
             this.Issues[file].Add(new Issue

@@ -9,13 +9,13 @@
     {
         public TextureAnalyser(YCache cache) : base(cache) { }
 
-        public override HashSet<string> SupportedExtensions => new()
-        {
+        public override HashSet<string> SupportedExtensions =>
+        [
             ".ydr",
             ".ydd",
             ".yft",
             ".ytd",
-        };
+        ];
 
         public override async Task AnalyseAsync(string file)
         {

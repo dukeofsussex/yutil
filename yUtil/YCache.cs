@@ -8,9 +8,9 @@
     {
         public RpfManager RpfManager { get; private set; }
 
-        public Dictionary<uint, Archetype> Archetypes { get; private set; } = new();
+        public Dictionary<uint, Archetype> Archetypes { get; private set; } = [];
 
-        public Dictionary<uint, RpfFileEntry> CoreFiles {  get; private set; } = new();
+        public Dictionary<uint, RpfFileEntry> CoreFiles { get; private set; } = [];
 
         private Action<string>? UpdateStatus;
         private Action<string>? ErrorLog;
