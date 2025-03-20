@@ -9,21 +9,21 @@ namespace yUtil.Analyser
     {
         public override HashSet<string> SupportedExtensions =>
         [
-            ".ydr",
             ".ydd",
+            ".ydr",
             ".yft",
             ".ytd",
         ];
 
         public override async Task AnalyseAsync(string file)
         {
-            string ext = Path.GetExtension(file)[1..];
+            string ext = Path.GetExtension(file);
             GameFile gameFile = ext switch
             {
-                "ydd" => new YddFile(),
-                "ydr" => new YdrFile(),
-                "yft" => new YftFile(),
-                "ytd" => new YtdFile(),
+                ".ydd" => new YddFile(),
+                ".ydr" => new YdrFile(),
+                ".yft" => new YftFile(),
+                ".ytd" => new YtdFile(),
                 _ => throw new InvalidOperationException($"Missing gamefile assignment for \"{ext}\"!"),
             };
 
