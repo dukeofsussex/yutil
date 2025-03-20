@@ -11,7 +11,7 @@ Command analyseCommand = new("analyse", "Analyse resources for conflicts")
 {
     new Argument<string>(
         name: "dir",
-        description: "Directory to analyse"
+        description: "Directory or file to analyse"
     ),
     new Option<string>(
         name: "--ext",

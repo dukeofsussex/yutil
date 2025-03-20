@@ -27,26 +27,20 @@ namespace yUtil
         {
             this.RunDir = dir;
 
-            foreach (string file in Directory.EnumerateFiles(dir, pattern, SearchOption.AllDirectories))
+            if (File.Exists(this.RunDir))
             {
-                string ext = Path.GetExtension(file);
-
-                if (ext == ".ytyp" && !this.Extensions.Contains(".ytyp"))
+                await this.ProcessFile(this.RunDir);
+            }
+            else if (Directory.Exists(this.RunDir))
+            {
+                foreach (string file in Directory.EnumerateFiles(dir, pattern, SearchOption.AllDirectories))
                 {
-                    YtypFile ytypFile = new();
-                    await ytypFile.LoadFileAsync(file, this.cache);
-                    this.cache.RegisterArchetypes(ytypFile.AllArchetypes);
+                    await this.ProcessFile(file);
                 }
-
-                if (this.Extensions.Contains(ext))
-                {
-                    string shortened = ShortenFilePath(file);
-                    Write($"Processing {shortened[(shortened.Length - Math.Min(shortened.Length, Console.BufferWidth - 15))..].Pastel(ConsoleColor.DarkCyan)}...");
-                    JenkIndex.Ensure(Path.GetFileName(file));
-                    JenkIndex.Ensure(Path.GetFileNameWithoutExtension(file));
-
-                    await this.HandleFileAsync(file);
-                }
+            }
+            else
+            {
+                throw new EntryPointNotFoundException($"Directory/File doesn't exist: \"{dir}\"!");
             }
 
             Write("Processed.".Pastel(ConsoleColor.DarkGreen));
@@ -59,12 +53,34 @@ namespace yUtil
 
         protected abstract Task HandleFileAsync(string file);
 
-        protected string ShortenFilePath(string path) => $".{path[this.RunDir.Length..]}";
+        protected string ShortenFilePath(string path) => $".{path[this.RunDir!.Length..]}";
 
         protected static void Write(string text)
         {
             Console.ResetColor();
             Console.Write($"\r{text.PadRight(Console.BufferWidth)}");
+        }
+
+        private async Task ProcessFile(string file)
+        {
+            string ext = Path.GetExtension(file);
+
+            if (ext == ".ytyp" && !this.Extensions.Contains(".ytyp"))
+            {
+                YtypFile ytypFile = new();
+                await ytypFile.LoadFileAsync(file, this.cache);
+                this.cache.RegisterArchetypes(ytypFile.AllArchetypes);
+            }
+
+            if (this.Extensions.Contains(ext))
+            {
+                string shortened = ShortenFilePath(file);
+                Write($"Processing {shortened[(shortened.Length - Math.Min(shortened.Length, Console.BufferWidth - 15))..].Pastel(ConsoleColor.DarkCyan)}...");
+                JenkIndex.Ensure(Path.GetFileName(file));
+                JenkIndex.Ensure(Path.GetFileNameWithoutExtension(file));
+
+                await this.HandleFileAsync(file);
+            }
         }
     }
 }
