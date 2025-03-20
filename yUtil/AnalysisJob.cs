@@ -35,9 +35,12 @@ namespace yUtil
 
         protected override async Task HandleFileAsync(string file)
         {
-            foreach (IAnalyser analyser in this.analysers[Path.GetExtension(file)])
-            {
-                await analyser.AnalyseAsync(file);
+
+            if (this.analysers.TryGetValue(Path.GetExtension(file), out List<IAnalyser> analysers)) {
+                foreach (IAnalyser analyser in analysers)
+                {
+                    await analyser.AnalyseAsync(file);
+                }
             }
         }
 
