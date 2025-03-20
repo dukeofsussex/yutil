@@ -24,7 +24,7 @@ namespace yUtil.Analyser
                 "ydr" => new YdrFile(),
                 "yft" => new YftFile(),
                 "ytd" => new YtdFile(),
-                _ => throw new InvalidOperationException($"Missing gamefile assignment for {ext}!"),
+                _ => throw new InvalidOperationException($"Missing gamefile assignment for \"{ext}\"!"),
             };
 
             await gameFile.LoadFileAsync(file, this.cache);

@@ -135,7 +135,7 @@ namespace yUtil
                         (gameFile as YtypFile)!.Load(data);
                         break;
                     default:
-                        throw new InvalidOperationException($"Missing loading logic for {gameFile.Type}!");
+                        throw new InvalidOperationException($"Missing loading logic for \"{gameFile.Type}\"!");
                 }
             }
             catch (InvalidDataException) // Escrowed

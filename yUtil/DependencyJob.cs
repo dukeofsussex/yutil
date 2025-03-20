@@ -31,7 +31,7 @@ namespace yUtil
             {
                 "ymap" => new YmapFile(),
                 "ytyp" => new YtypFile(),
-                _ => throw new InvalidOperationException($"Missing gamefile assignment for {ext}!"),
+                _ => throw new InvalidOperationException($"Missing gamefile assignment for \"{ext}\"!"),
             };
 
             await gameFile.LoadFileAsync(file, this.cache);
@@ -118,7 +118,7 @@ namespace yUtil
                 }
                 else
                 {
-                    throw new InvalidOperationException($"Missing gamefile processor for {file.FilePath}!");
+                    throw new InvalidOperationException($"Missing gamefile processor for \"{file.FilePath}\"!");
                 }
 
                 if (dependencies.Count == 0)
