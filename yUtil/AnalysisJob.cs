@@ -43,8 +43,6 @@ namespace yUtil
 
         protected override async Task FinishAsync()
         {
-            Write("Generating report...");
-
             Dictionary<string, IOrderedEnumerable<Issue>> fileIssues = this.analysers.Values
                 .SelectMany(a => a)
                 .Distinct()
@@ -54,6 +52,13 @@ namespace yUtil
                     .OrderByDescending(x => x.Severity)
                     .ThenBy(x => x.Message));
 
+            if (fileIssues.Count == 0)
+            {
+                Console.WriteLine("OK.".Pastel(ConsoleColor.DarkGreen));
+                return;
+            }
+
+            Write("Generating report...");
             StringBuilder builder = new();
             int ciExitCode = CI.ExitCode;
 
@@ -80,7 +85,8 @@ namespace yUtil
 
             if (CI.Enabled)
             {
-                Console.Write(builder.ToString());
+                Console.WriteLine();
+                Console.WriteLine(builder.ToString());
                 CI.ExitCode = ciExitCode;
             }
             else

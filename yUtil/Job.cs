@@ -53,7 +53,7 @@ namespace yUtil
 
         protected abstract Task HandleFileAsync(string file);
 
-        protected string ShortenFilePath(string path) => $".{path[this.RunDir!.Length..]}";
+        protected string ShortenFilePath(string path) => path == this.RunDir ? Path.GetFileName(path) : $".{path[this.RunDir!.Length..]}";
 
         protected static void Write(string text)
         {
@@ -75,7 +75,11 @@ namespace yUtil
             if (this.Extensions.Contains(ext))
             {
                 string shortened = ShortenFilePath(file);
-                Write($"Processing {shortened[(shortened.Length - Math.Min(shortened.Length, Console.BufferWidth - 15))..].Pastel(ConsoleColor.DarkCyan)}...");
+                if ((Console.BufferWidth > 0) && (shortened.Length > (Console.BufferWidth - 15)))
+                {
+                    shortened = shortened[(shortened.Length - Console.BufferWidth - 15)..];
+                }
+                Write($"Processing {shortened.Pastel(ConsoleColor.DarkCyan)}...");
                 JenkIndex.Ensure(Path.GetFileName(file));
                 JenkIndex.Ensure(Path.GetFileNameWithoutExtension(file));
 
