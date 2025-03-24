@@ -9,6 +9,7 @@ namespace yUtil.Analyser
     internal class TextureAnalyser(YCache cache) : Analyser(cache)
     {
         private const int MIN_MIPMAP_PX = 4;
+        private const int MAX_MIPMAP_PX = 1024;
 
         public override HashSet<string> SupportedExtensions =>
         [
@@ -68,14 +69,22 @@ namespace yUtil.Analyser
             {
                 bool isScriptDial = (texture.Format is TextureFormat.D3DFMT_A8R8G8B8 or TextureFormat.D3DFMT_A8B8G8R8) && texture.Name.StartsWith("script_rt_", StringComparison.Ordinal);
 
-                if (texture.Height > 1024 || texture.Width > 1024)
+                if (texture.Height < MIN_MIPMAP_PX || texture.Width < MIN_MIPMAP_PX)
+                {
+                    this.AddIssue(IssueSeverity.Error, file, $"Size: {texture.Name}.dds ({texture.Width}x{texture.Height})");
+                }
+                else if (texture.Height > MAX_MIPMAP_PX || texture.Width > MAX_MIPMAP_PX)
                 {
                     this.AddIssue(IssueSeverity.Warn, file, $"Size: {texture.Name}.dds ({texture.Width}x{texture.Height})");
                 }
 
-                if (!IsPowerOfTwo(texture.Height) || !IsPowerOfTwo(texture.Width))
+                if (!IsEven(texture.Height) || !IsEven(texture.Width))
                 {
                     this.AddIssue(IssueSeverity.Error, file, $"Dimensions: {texture.Name}.dds ({texture.Width}x{texture.Height})");
+                }
+                else if (!IsPowerOfTwo(texture.Height) || !IsPowerOfTwo(texture.Width))
+                {
+                    this.AddIssue(IssueSeverity.Warn, file, $"Dimensions: {texture.Name}.dds ({texture.Width}x{texture.Height})");
                 }
 
                 if ((texture.Format is not TextureFormat.D3DFMT_DXT1 and not TextureFormat.D3DFMT_DXT5) && !isScriptDial)
@@ -96,7 +105,7 @@ namespace yUtil.Analyser
 
                 if (texture.MemoryUsage > 10000000f)
                 {
-                    this.AddIssue(IssueSeverity.Info, file, $"Memory Usage: {texture.Name}.dds ({texture.MemoryUsage / 10000000f:F2}MB)");
+                    this.AddIssue(IssueSeverity.Warn, file, $"Memory Usage: {texture.Name}.dds ({texture.MemoryUsage / 10000000f:F2}MB)");
                 }
             }
         }
