@@ -1,5 +1,4 @@
 using dotenv.net;
-using Pastel;
 using System.CommandLine;
 using yUtil;
 using yUtil.Analyser;
@@ -105,14 +104,10 @@ RootCommand rootCommand = new("A tool to help manage FiveM resources")
     },
 };
 
-try
+int result = await rootCommand.InvokeAsync(args);
+if (result != 0)
 {
-    await rootCommand.InvokeAsync(args);
-}
-catch (Exception e)
-{
-    Console.WriteLine(e.Message.Pastel(ConsoleColor.DarkRed));
-    return 1;
+    return result;
 }
 
 return CI.Enabled ? CI.ExitCode : 0;
