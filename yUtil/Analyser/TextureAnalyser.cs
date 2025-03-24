@@ -1,12 +1,15 @@
 namespace yUtil.Analyser
 {
     using CodeWalker.GameFiles;
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using yUtil;
 
     internal class TextureAnalyser(YCache cache) : Analyser(cache)
     {
+        private const int MIN_MIPMAP_PX = 4;
+
         public override HashSet<string> SupportedExtensions =>
         [
             ".ydd",
@@ -80,7 +83,7 @@ namespace yUtil.Analyser
                     this.AddIssue(IssueSeverity.Warn, file, $"Format: {texture.Name}.dds ({texture.Format})");
                 }
 
-                double requiredLevels = Math.Ceiling(Math.Log2(Math.Min(texture.Width, texture.Height))) - 1;
+                double requiredLevels = CalculateMipMapLevels(Math.Min(texture.Width, texture.Height));
 
                 if (texture.Levels < requiredLevels && !isScriptDial)
                 {
@@ -97,6 +100,28 @@ namespace yUtil.Analyser
                 }
             }
         }
+
+        private static int CalculateMipMapLevels(ushort dimensions)
+        {
+            if (IsPowerOfTwo(dimensions))
+            {
+                return (int)(Math.Ceiling(Math.Log2(dimensions)) - 1);
+            }
+
+            int count = 0;
+            double step = dimensions;
+
+            do
+            {
+                count++;
+                step /= 2;
+            }
+            while (IsEven(step) && dimensions > MIN_MIPMAP_PX);
+
+            return count;
+        }
+
+        private static bool IsEven(double x) => x % 2 == 0;
 
         private static bool IsPowerOfTwo(ushort x) => (x != 0) && ((x & (x - 1)) == 0);
     }
