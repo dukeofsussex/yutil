@@ -33,7 +33,7 @@ namespace yUtil.Analyser
             }
             else if (extents > 1500f)
             {
-                this.AddIssue(IssueSeverity.Warn, file, $"Extents: Large area ({extents:F2})");
+                this.AddIssue(IssueSeverity.Warn, file, $"Extents: Large streaming area ({extents:F2}m²)");
             }
 
             string name = Path.GetFileName(file);
