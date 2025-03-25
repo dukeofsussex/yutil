@@ -67,7 +67,8 @@ namespace yUtil.Analyser
 
             foreach (Texture texture in textures)
             {
-                bool isScriptDial = (texture.Format is TextureFormat.D3DFMT_A8R8G8B8 or TextureFormat.D3DFMT_A8B8G8R8) && texture.Name.StartsWith("script_rt_", StringComparison.Ordinal);
+                bool permittedRawTexture = (texture.Format is TextureFormat.D3DFMT_A8R8G8B8 or TextureFormat.D3DFMT_A8B8G8R8)
+                    && (texture.Name.StartsWith("script_rt_", StringComparison.Ordinal) || texture.Name.EndsWith("_pal", StringComparison.Ordinal));
 
                 if (texture.Height < MIN_MIPMAP_PX || texture.Width < MIN_MIPMAP_PX)
                 {
@@ -87,14 +88,14 @@ namespace yUtil.Analyser
                     this.AddIssue(IssueSeverity.Warn, file, $"Dimensions: {texture.Name}.dds ({texture.Width}x{texture.Height})");
                 }
 
-                if ((texture.Format is not TextureFormat.D3DFMT_DXT1 and not TextureFormat.D3DFMT_DXT5) && !isScriptDial)
+                if ((texture.Format is not TextureFormat.D3DFMT_DXT1 and not TextureFormat.D3DFMT_DXT5) && !permittedRawTexture)
                 {
                     this.AddIssue(IssueSeverity.Warn, file, $"Format: {texture.Name}.dds ({texture.Format})");
                 }
 
                 double requiredLevels = CalculateMipMapLevels(Math.Min(texture.Width, texture.Height));
 
-                if (texture.Levels < requiredLevels && !isScriptDial)
+                if (texture.Levels < requiredLevels && !permittedRawTexture)
                 {
                     this.AddIssue(IssueSeverity.Error, file, $"Missing Mipmaps: {texture.Name}.dds ({texture.Levels}/{requiredLevels})");
                 }
