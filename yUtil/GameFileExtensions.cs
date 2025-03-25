@@ -10,6 +10,18 @@ namespace yUtil
     {
         private const float Epsilon = 0.001f;
 
+        public static string ToDetailedString(this MetaHash hash)
+        {
+            string name = hash.ToString();
+
+            if (ulong.TryParse(name, out _))
+            {
+                name = $"{name} | hash_{hash.Hex}";
+            }
+
+            return name;
+        }
+
         public static YmapEntityDef? FindEntityDef(this YmapFile ymapFile, YmapEntityDef def, int index)
         {
             if (ymapFile.AllEntities?.Length > index)

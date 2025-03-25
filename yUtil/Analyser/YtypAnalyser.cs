@@ -38,11 +38,12 @@ namespace yUtil.Analyser
 
                 if (original && !this.cache.Archetypes.ContainsKey(archetype.Hash))
                 {
-                    this.AddIssue(IssueSeverity.Warn, file, $"Diversion: \"{JenkIndex.GetString(archetype.Hash)}\" not in original.");
+                    this.AddIssue(IssueSeverity.Warn, file, $"Diversion: \"{archetype.Hash.ToDetailedString()}\" not in original.");
                 }
                 else if (customArchetypes.ContainsKey(archetype.Hash))
                 {
-                    this.AddIssue(IssueSeverity.Error, file, $"Redefinition: {JenkIndex.GetString(archetype.Hash)} ({customArchetypes[archetype.Hash].Ytyp.FilePath})");
+                    string a = archetype.Hash.ToString();
+                    this.AddIssue(IssueSeverity.Error, file, $"Redefinition: {archetype.Hash.ToDetailedString()} ({customArchetypes[archetype.Hash].Ytyp.FilePath})");
                 }
                 else if (!customArchetypes.ContainsKey(archetype.Hash))
                 {
