@@ -22,8 +22,6 @@ namespace yUtil.Analyser
                 return;
             }
 
-            float extents = (modYmap.CMapData.streamingExtentsMax + modYmap.CMapData.streamingExtentsMin).Length();
-
             if (modYmap.CMapData.entitiesExtentsMax == new Vector3(float.MinValue)
                 || modYmap.CMapData.entitiesExtentsMin == new Vector3(float.MaxValue)
                 || modYmap.CMapData.streamingExtentsMax == new Vector3(float.MinValue)
@@ -31,27 +29,29 @@ namespace yUtil.Analyser
             {
                 this.AddIssue(IssueSeverity.Error, file, $"Extents: Need to be calculated!");
             }
-            else if (extents > 1500f)
-            {
-                this.AddIssue(IssueSeverity.Warn, file, $"Extents: Large streaming area ({extents:F2}m²)");
-            }
 
             string name = Path.GetFileName(file);
 
-            RpfEntry entry = this.cache.CoreFiles.FirstOrDefault(e => e.Key == JenkHash.GenHash(name)).Value;
-
-            if (entry == null)
+            if (!this.cache.CoreFiles.TryGetValue(JenkHash.GenHash(name), out RpfFileEntry entry))
             {
+                for (int i = 0; i < modYmap.AllEntities.Length; i++)
+                {
+                    this.AnalyseEntityDef(file, modYmap.AllEntities[i]);
+                }
+
                 return;
             }
 
-            RpfFileEntry rpfFileEntry = (RpfFileEntry)entry;
-
             YmapFile ogYmap = new();
-            ogYmap.Load(entry.File.ExtractFile(rpfFileEntry), rpfFileEntry);
+            ogYmap.Load(entry.File.ExtractFile(entry), entry);
 
             if (ogYmap.AllEntities == null)
             {
+                if (modYmap.AllEntities != null)
+                {
+                    this.AddIssue(IssueSeverity.Error, file, "Entities: Original YMAP has none.");
+                }
+
                 return;
             }
 
@@ -60,22 +60,30 @@ namespace yUtil.Analyser
                 YmapEntityDef ogDef = ogYmap.AllEntities[i];
                 YmapEntityDef? def = modYmap.FindEntityDef(ogDef, i);
 
-                if (def != null)
-                {
-                    if (ogDef.Position.Z > def.Position.Z && def.CEntityDef.lodLevel == rage__eLodType.LODTYPES_DEPTH_ORPHANHD)
-                    {
-                        this.AddIssue(IssueSeverity.Info, file, $"Unnecessary Reposition: [{def.Index}] \"{def.Name}\" ({def.Position}) can be deleted.");
-                    }
+                this.AnalyseEntityDef(file, def, ogDef);
+            }
+        }
 
-                    if (def.LodDist >= 1000)
-                    {
-                        this.AddIssue(IssueSeverity.Info, file, $"Large LOD Distance: [{def.Index}] \"{def.Name}\" ({def.LodDist})");
-                    }
-                }
-                else if (def == null && ogDef.CEntityDef.lodLevel != rage__eLodType.LODTYPES_DEPTH_ORPHANHD)
+        private void AnalyseEntityDef(string file, YmapEntityDef? def, YmapEntityDef? ogDef = null)
+        {
+            if (def == null)
+            {
+                if (ogDef != null && ogDef.CEntityDef.lodLevel != rage__eLodType.LODTYPES_DEPTH_ORPHANHD)
                 {
                     this.AddIssue(IssueSeverity.Error, file, $"LOD Disconnect: Deleted linked entity [{ogDef.Index}] \"{ogDef.Name}\" ({ogDef.Position}) ({ogDef.CEntityDef.lodLevel})");
                 }
+
+                return;
+            }
+
+            if (ogDef != null && ogDef.Position.Z > def.Position.Z && def.CEntityDef.lodLevel == rage__eLodType.LODTYPES_DEPTH_ORPHANHD)
+            {
+                this.AddIssue(IssueSeverity.Info, file, $"Unnecessary Reposition: [{def.Index}] \"{def.Name}\" ({def.Position}) can be deleted.");
+            }
+
+            if (def.CEntityDef.lodDist > 200 && (def.CEntityDef.lodLevel == rage__eLodType.LODTYPES_DEPTH_ORPHANHD || def.CEntityDef.lodLevel == rage__eLodType.LODTYPES_DEPTH_HD))
+            {
+                this.AddIssue(def.LodDist >= 500 ? IssueSeverity.Error : IssueSeverity.Warn, file, $"Large LOD Distance: [{def.Index}] \"{def.CEntityDef.archetypeName.ToDetailedString()}\" ({def.CEntityDef.lodDist})");
             }
         }
     }
