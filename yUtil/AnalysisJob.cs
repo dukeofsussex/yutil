@@ -61,7 +61,6 @@ namespace yUtil
                 return;
             }
 
-            Write("Generating report...");
             StringBuilder builder = new();
             int ciExitCode = CI.ExitCode;
 

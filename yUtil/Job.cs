@@ -18,9 +18,6 @@ namespace yUtil
                 (string u) => Write(u[..Math.Min(u.Length, Console.BufferWidth)]),
                 (string err) => Console.WriteLine(err.Pastel(ConsoleColor.DarkRed))
             );
-
-            Write("Ready.".Pastel(ConsoleColor.DarkGreen));
-            Console.WriteLine();
         }
 
         public async Task Run(string dir, string pattern = "*.y*")
@@ -37,13 +34,14 @@ namespace yUtil
                 {
                     await this.ProcessFile(file);
                 }
+
+                Write("Processed.".Pastel(ConsoleColor.DarkGreen));
             }
             else
             {
                 throw new EntryPointNotFoundException($"Directory/File doesn't exist: \"{dir}\"!");
             }
 
-            Write("Processed.".Pastel(ConsoleColor.DarkGreen));
             Console.WriteLine();
 
             await this.FinishAsync();

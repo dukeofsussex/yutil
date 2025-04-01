@@ -29,7 +29,6 @@ namespace yUtil
         {
             if (CI.Enabled)
             {
-                Console.WriteLine("[CI] Ignoring GTA directory...".Pastel(ConsoleColor.DarkYellow));
                 return;
             }
 
@@ -79,6 +78,9 @@ namespace yUtil
                     }
                 }
             }
+
+            this.UpdateStatus("Ready.".Pastel(ConsoleColor.DarkGreen));
+            Console.WriteLine();
         }
 
         public void RegisterArchetypes(Archetype[] archetypes)
