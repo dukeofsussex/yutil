@@ -34,9 +34,12 @@ namespace yUtil.Analyser
 
             if (!this.cache.CoreFiles.TryGetValue(JenkHash.GenHash(name), out RpfFileEntry entry))
             {
-                for (int i = 0; i < modYmap.AllEntities.Length; i++)
+                if (modYmap.AllEntities != null)
                 {
-                    this.AnalyseEntityDef(file, modYmap.AllEntities[i]);
+                    for (int i = 0; i < modYmap.AllEntities.Length; i++)
+                    {
+                        this.AnalyseEntityDef(file, modYmap.AllEntities[i]);
+                    }
                 }
 
                 return;
