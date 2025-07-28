@@ -75,7 +75,7 @@ namespace yUtil
                 string shortened = ShortenFilePath(file);
                 if ((Console.BufferWidth > 0) && (shortened.Length > (Console.BufferWidth - 15)))
                 {
-                    shortened = shortened[(shortened.Length - Console.BufferWidth - 15)..];
+                    shortened = shortened[(shortened.Length - (Console.BufferWidth - 15))..];
                 }
                 Write($"Processing {shortened.Pastel(ConsoleColor.DarkCyan)}...");
                 JenkIndex.Ensure(Path.GetFileName(file));
