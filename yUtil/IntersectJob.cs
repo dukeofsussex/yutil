@@ -152,7 +152,7 @@ namespace yUtil
 
                 if (otherDef == null)
                 {
-                    Console.WriteLine($"Skipping [{index}] {entityDef.Name.Pastel(ConsoleColor.DarkYellow)} (not in {right.Name.Pastel(ConsoleColor.DarkCyan)})...");
+                    Console.WriteLine($"Skipping [{index}] {entityDef.Name} ({"not found".Pastel(ConsoleColor.DarkYellow)})...");
                     entityDefs[i] = null;
                     continue;
                 }
